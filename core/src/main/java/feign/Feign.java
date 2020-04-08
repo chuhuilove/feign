@@ -1,16 +1,3 @@
-/**
- * Copyright 2012-2019 The Feign Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
 package feign;
 
 import java.io.IOException;
@@ -28,9 +15,8 @@ import feign.codec.ErrorDecoder;
 import static feign.ExceptionPropagationPolicy.NONE;
 
 /**
- * Feign's purpose is to ease development against http apis that feign restfulness. <br>
- * In implementation, Feign is a {@link Feign#newInstance factory} for generating {@link Target
- * targeted} http apis.
+ * Feign的目的就是简化项目之间Http api之间的调用<br>
+ * 在实现中,Feign是一个用于生成{@link Target targeted} http api的{@link Feign#newInstance factory}.
  */
 public abstract class Feign {
 
