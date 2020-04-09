@@ -15,6 +15,9 @@ import static feign.FeignException.errorReading;
 import static feign.Util.checkNotNull;
 import static feign.Util.ensureClosed;
 
+/**
+ * 同步调用.....
+ */
 final class SynchronousMethodHandler implements MethodHandler {
 
   private static final long MAX_RESPONSE_BUFFER_SIZE = 8192L;
