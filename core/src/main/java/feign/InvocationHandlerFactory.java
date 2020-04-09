@@ -6,6 +6,9 @@ import java.util.Map;
 
 /**
  * Controls reflective method dispatch.
+ * //todo 2020年4月9日10:37:48
+ * 控制反射方法分发...
+ * 这个接口的设计原则是什么?
  */
 public interface InvocationHandlerFactory {
 

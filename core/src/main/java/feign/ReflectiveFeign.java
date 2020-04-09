@@ -71,6 +71,14 @@ public class ReflectiveFeign extends Feign {
       this.dispatch = checkNotNull(dispatch, "dispatch for %s", target);
     }
 
+    /**
+     * InvocationHandler接口中定义,需要实现的函数
+     * @param proxy
+     * @param method
+     * @param args
+     * @return
+     * @throws Throwable
+     */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
       if ("equals".equals(method.getName())) {
