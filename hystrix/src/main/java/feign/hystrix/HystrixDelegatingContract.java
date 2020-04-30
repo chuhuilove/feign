@@ -31,8 +31,10 @@ public final class HystrixDelegatingContract implements Contract {
 
   @Override
   public List<MethodMetadata> parseAndValidatateMetadata(Class<?> targetType) {
+    // 这个delegate是SpringMvcContract类型
     List<MethodMetadata> metadatas = this.delegate.parseAndValidatateMetadata(targetType);
 
+    // 拿到了所有,已经解析好的方法数据
     for (MethodMetadata metadata : metadatas) {
       Type type = metadata.returnType();
 

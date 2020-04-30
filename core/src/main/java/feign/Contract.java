@@ -19,6 +19,7 @@ import static feign.Util.emptyToNull;
 
 /**
  * Defines what annotations and values are valid on interfaces.
+ * 定义接口上有效的注解和值.
  */
 public interface Contract {
 
@@ -70,6 +71,7 @@ public interface Contract {
      * Called indirectly by {@link #parseAndValidatateMetadata(Class)}.
      */
     protected MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
+
       MethodMetadata data = new MethodMetadata();
       data.returnType(Types.resolve(targetType, targetType, method.getGenericReturnType()));
       data.configKey(Feign.configKey(targetType, method));

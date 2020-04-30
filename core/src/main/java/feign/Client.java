@@ -29,13 +29,13 @@ import javax.net.ssl.SSLSocketFactory;
 import feign.Request.Options;
 
 /**
- * Submits HTTP {@link Request requests}. Implementations are expected to be thread-safe.
+ * 提交HTTP{@link Request requests}.其实现应该是线程安全的.
+ *
  */
 public interface Client {
 
   /**
-   * Executes a request against its {@link Request#url() url} and returns a response.
-   *
+   * 针对{@link Request#url() url}来执行远程请求,并返回结果
    * @param request safe to replay.
    * @param options options to apply to this request.
    * @return connected response, {@link Response.Body} is absent or unread.
@@ -43,6 +43,10 @@ public interface Client {
    */
   Response execute(Request request, Options options) throws IOException;
 
+  /**
+   * {@code Client}的默认实现
+   * 先来看一下,默认实现,是怎么来搞定的
+   */
   class Default implements Client {
 
     private final SSLSocketFactory sslContextFactory;

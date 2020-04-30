@@ -2,9 +2,11 @@ package feign;
 
 /**
  * Zero or more {@code RequestInterceptors} may be configured for purposes such as adding headers to
- * all requests. No guarantees are give with regards to the order that interceptors are applied.
- * Once interceptors are applied, {@link Target#apply(RequestTemplate)} is called to create the
- * immutable http request sent via {@link Client#execute(Request, feign.Request.Options)}. <br>
+ * all requests.
+ * 可以配置零个或多个{@code RequestInterceptors},用于向所有请求添加请求头等信息.
+ * 对于拦截器的应用顺序,不做任何保证.
+ * 一旦拦截器被应用,就会调用{@link Target#apply(RequestTemplate)}来创建通过
+ * {@link Client#execute(Request, feign.Request.Options)}发送的不变的HTTP请求.<br>
  * <br>
  * For example: <br>
  * 
@@ -13,7 +15,7 @@ package feign;
  *   input.header(&quot;X-Auth&quot;, currentToken);
  * }
  * </pre>
- * 
+ *
  * <br>
  * <br>
  * <b>Configuration</b><br>

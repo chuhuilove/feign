@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import feign.Logger.NoOpLogger;
 import feign.ReflectiveFeign.ParseHandlersByName;
@@ -31,21 +32,18 @@ public abstract class Feign {
    * {@link MethodMetadata#configKey()} for correlation purposes.
    *
    * <p>
-   * Here are some sample encodings:
+   * 下面是一些编码示例:
    *
    * <pre>
    * <ul>
-   *   <li>{@code Route53}: would match a class {@code route53.Route53}</li>
-   *   <li>{@code Route53#list()}: would match a method {@code route53.Route53#list()}</li>
-   *   <li>{@code Route53#listAt(Marker)}: would match a method {@code
-   * route53.Route53#listAt(Marker)}</li>
-   *   <li>{@code Route53#listByNameAndType(String, String)}: would match a method {@code
-   * route53.Route53#listAt(String, String)}</li>
+   *   <li>{@code Route53}: 将匹配方法 {@code route53.Route53}</li>
+   *   <li>{@code Route53#list()}: 将匹配方法{@code route53.Route53#list()}</li>
+   *   <li>{@code Route53#listAt(Marker)}: 将匹配方法{@code route53.Route53#listAt(Marker)}</li>
+   *   <li>{@code Route53#listByNameAndType(String, String)}:将匹配方法{@code route53.Route53#listAt(String, String)}</li>
    * </ul>
    * </pre>
    *
    * Note that there is no whitespace expected in a key!
-   *
    * @param targetType {@link feign.Target#type() type} of the Feign interface.
    * @param method invoked method, present on {@code type} or its super.
    * @see MethodMetadata#configKey()
@@ -64,6 +62,27 @@ public abstract class Feign {
     return builder.append(')').toString();
   }
 
+  public static void main(String[] args) {
+    Method[] methods = Feign.class.getMethods();
+    Arrays.stream(methods).forEach(e-> System.err.println(configKey(Feign.class, e)));
+    /**
+     * Feign#main(String[])
+     * Feign#builder()
+     * Feign#newInstance(Target)
+     * Feign#configKey(Method)
+     * Feign#configKey(Class,Method)
+     * Feign#wait(long)
+     * Feign#wait(long,int)
+     * Feign#wait()
+     * Feign#equals(Object)
+     * Feign#toString()
+     * Feign#hashCode()
+     * Feign#getClass()
+     * Feign#notify()
+     * Feign#notifyAll()
+     */
+  }
+
   /**
    * @deprecated use {@link #configKey(Class, Method)} instead.
    */
@@ -74,14 +93,18 @@ public abstract class Feign {
 
   /**
    * Returns a new instance of an HTTP API, defined by annotations in the {@link Feign Contract},
-   * for the specified {@code target}. You should cache this result.
+   * for the specified {@code target}.
+   * 返回HTTP API的新实例,该实例由{@link Feign Contract}中的注解针对指定的{@code target}定义.
+   * 你应该缓存这个结果.
    */
   public abstract <T> T newInstance(Target<T> target);
 
+  /**
+   * 采用构建者模式,将几个组件全部独立出来,然后在这里进行组合
+   */
   public static class Builder {
 
-    private final List<RequestInterceptor> requestInterceptors =
-        new ArrayList<RequestInterceptor>();
+    private final List<RequestInterceptor> requestInterceptors = new ArrayList<RequestInterceptor>();
     private Logger.Level logLevel = Logger.Level.NONE;
     private Contract contract = new Contract.Default();
     private Client client = new Client.Default(null, null);
@@ -238,12 +261,16 @@ public abstract class Feign {
     }
 
     public Feign build() {
+      // 同步方法处理器
       SynchronousMethodHandler.Factory synchronousMethodHandlerFactory =
           new SynchronousMethodHandler.Factory(client, retryer, requestInterceptors, logger,
               logLevel, decode404, closeAfterDecode, propagationPolicy);
+
+      // 通过名字,解析处理
       ParseHandlersByName handlersByName =
           new ParseHandlersByName(contract, options, encoder, decoder, queryMapEncoder,
               errorDecoder, synchronousMethodHandlerFactory);
+
       return new ReflectiveFeign(handlersByName, invocationHandlerFactory, queryMapEncoder);
     }
   }

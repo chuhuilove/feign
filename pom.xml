@@ -33,6 +33,7 @@
     <module>java8</module>
     <module>mock</module>
     <module>benchmark</module>
+      <module>example-server</module>
   </modules>
 
   <properties>

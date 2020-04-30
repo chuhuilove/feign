@@ -17,10 +17,9 @@ import java.util.stream.Collectors;
 import static feign.Util.*;
 
 /**
- * Request Builder for an HTTP Target.
+ * HTTP目标的请求生成器.
  * <p>
- * This class is a variation on a UriTemplate, where, in addition to the uri, Headers and Query
- * information also support template expressions.
+ * 这个类是UriTemplate的一个变体,除了uri之外,header和查询信息也支持模板表达式.
  * </p>
  */
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
@@ -40,7 +39,7 @@ public final class RequestTemplate implements Serializable {
   private CollectionFormat collectionFormat = CollectionFormat.EXPLODED;
 
   /**
-   * Create a new Request Template.
+   * 创建新的Request Template
    */
   public RequestTemplate() {
     super();
