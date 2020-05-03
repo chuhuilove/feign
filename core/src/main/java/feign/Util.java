@@ -119,7 +119,7 @@ public class Util {
   }
 
   /**
-   * Identifies a method as a default instance method.
+   * Identifies a method as a default instance method. 将方法标识为默认实例方法.,
    */
   public static boolean isDefault(Method method) {
     // Default methods are public non-abstract, non-synthetic, and non-static instance methods

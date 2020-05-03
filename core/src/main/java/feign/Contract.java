@@ -18,8 +18,7 @@ import static feign.Util.checkState;
 import static feign.Util.emptyToNull;
 
 /**
- * Defines what annotations and values are valid on interfaces.
- * 定义接口上有效的注解和值.
+ * Defines what annotations and values are valid on interfaces. 定义接口上有效的注解和值.
  */
 public interface Contract {
 
@@ -33,25 +32,56 @@ public interface Contract {
 
   abstract class BaseContract implements Contract {
 
+    /**
+     * 传递进来一个接口类型
+     * 
+     * @param targetType {@link feign.Target#type() type} of the Feign interface.
+     * @return
+     */
     @Override
     public List<MethodMetadata> parseAndValidatateMetadata(Class<?> targetType) {
+      // targetType.getTypeParameters()不存在
+
       checkState(targetType.getTypeParameters().length == 0, "Parameterized types unsupported: %s",
           targetType.getSimpleName());
+
+      // 这个类只能继承一个接口
       checkState(targetType.getInterfaces().length <= 1, "Only single inheritance supported: %s",
           targetType.getSimpleName());
+
+      // 如果已经继承了一个接口....
       if (targetType.getInterfaces().length == 1) {
+        // 校验那个接口是不是只继承了一个接口....
         checkState(targetType.getInterfaces()[0].getInterfaces().length == 0,
             "Only single-level inheritance supported: %s",
             targetType.getSimpleName());
       }
+
       Map<String, MethodMetadata> result = new LinkedHashMap<String, MethodMetadata>();
+
+      // 获取接口中定义的所有方法.
       for (Method method : targetType.getMethods()) {
+
+        // 判断方法的类型,以确定是否应该解析
+        // 如果方法是继承自Object的,或者是静态的,或者是默认的,则不进行解析
         if (method.getDeclaringClass() == Object.class ||
             (method.getModifiers() & Modifier.STATIC) != 0 ||
             Util.isDefault(method)) {
           continue;
         }
+
+        //
+        //
+        /**
+         * 将方法所在的类,方法本身,以及方法的参数,进行解析出来 解析的结果封装成{@link MethodMetadata}.
+         * 如果本类是{@code SpringMvcContract},
+         * 由于{@code SpringMvcContract}重写了{@link #parseAndValidateMetadata(Class, Method)}
+         * 所以会在实际运行的过程中,从{@code SpringMvcContract}调到本类实现的
+         * {@link #parseAndValidateMetadata(Class, Method)}中.
+         *
+         */
         MethodMetadata metadata = parseAndValidateMetadata(targetType, method);
+        // 校验一下,运行方法重载,但是不允许方法签名重载
         checkState(!result.containsKey(metadata.configKey()), "Overrides unsupported: %s",
             metadata.configKey());
         result.put(metadata.configKey(), metadata);
@@ -73,24 +103,42 @@ public interface Contract {
     protected MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
 
       MethodMetadata data = new MethodMetadata();
+      // 解析方法的返回类型
       data.returnType(Types.resolve(targetType, targetType, method.getGenericReturnType()));
+      // 设置方法的configKey
       data.configKey(Feign.configKey(targetType, method));
 
       if (targetType.getInterfaces().length == 1) {
         processAnnotationOnClass(data, targetType.getInterfaces()[0]);
       }
+      /**
+       * 在{@link Default#processAnnotationOnClass(MethodMetadata, Class)} 中,解析主接口上的@Headers注解
+       * 在{@link SpringMvcContract#processAnnotationOnClass(MethodMetadata, Class)}
+       * 中,解析主接口上的@RequestMapping注解
+       *
+       */
       processAnnotationOnClass(data, targetType);
 
 
       for (Annotation methodAnnotation : method.getAnnotations()) {
+        /**
+         * 获取方法上的所有注解,开始进行解析,解析结果存储到{@link MethodMetadata}中.
+         *
+         * 在{@link Default#processAnnotationOnClass(MethodMetadata, Class)}中,
+         * 解析接口方法上的{@code @Headers},{@code @ReadLine}和{@code @Body}注解
+         * 在{@link SpringMvcContract#processAnnotationOnClass(MethodMetadata, Class)}中,
+         * 解析接口方法上的{@code @RequestMapping}注解
+         */
         processAnnotationOnMethod(data, methodAnnotation, method);
       }
+      // 校验方法上的请求方式
       checkState(data.template().method() != null,
           "Method %s not annotated with HTTP method type (ex. GET, POST)",
           method.getName());
+      // 获取方法上的参数类型
       Class<?>[] parameterTypes = method.getParameterTypes();
       Type[] genericParameterTypes = method.getGenericParameterTypes();
-
+      // 获取方法上参数类型上的注解
       Annotation[][] parameterAnnotations = method.getParameterAnnotations();
       int count = parameterAnnotations.length;
       for (int i = 0; i < count; i++) {
@@ -163,12 +211,21 @@ public interface Contract {
      * Called by parseAndValidateMetadata twice, first on the declaring class, then on the target
      * type (unless they are the same).
      *
+     * 在{@link Default#processAnnotationOnClass(MethodMetadata, Class)}中, 解析主接口上的{@code @Headers}注解
+     * 在{@link SpringMvcContract#processAnnotationOnClass(MethodMetadata, Class)}中,
+     * 解析主接口上的{@code @RequestMapping}注解
+     *
      * @param data metadata collected so far relating to the current java method.
      * @param clz the class to process
      */
     protected abstract void processAnnotationOnClass(MethodMetadata data, Class<?> clz);
 
     /**
+     * 在{@link Default#processAnnotationOnClass(MethodMetadata, Class)}中,
+     * 解析接口方法上的{@link Headers},{@link RequestLine}和{@link Body}注解
+     * 在{@link SpringMvcContract#processAnnotationOnClass(MethodMetadata, Class)}中,
+     * 解析接口方法上的{@code @RequestMapping}注解
+     *
      * @param data metadata collected so far relating to the current java method.
      * @param annotation annotations present on the current method annotation.
      * @param method method currently being processed.
@@ -178,6 +235,11 @@ public interface Contract {
                                                       Method method);
 
     /**
+     * 在{@link Default#processAnnotationOnClass(MethodMetadata, Class)}中,
+     * 解析接口方法上的{@link Param},{@link QueryMap}和{@link HeaderMap}注解
+     * 在{@link SpringMvcContract#processAnnotationOnClass(MethodMetadata, Class)}中,
+     * 解析接口方法上的{@code @RequestMapping}注解
+     *
      * @param data metadata collected so far relating to the current java method.
      * @param annotations annotations present on the current parameter annotation.
      * @param paramIndex if you find a name in {@code annotations}, call
@@ -206,12 +268,17 @@ public interface Contract {
 
     @Override
     protected void processAnnotationOnClass(MethodMetadata data, Class<?> targetType) {
+      // 默认的配置中,判断主接口上是否有{@code Headers}注解,这个注解
       if (targetType.isAnnotationPresent(Headers.class)) {
+
+        // 从Header中获取设置的请求头
         String[] headersOnType = targetType.getAnnotation(Headers.class).value();
         checkState(headersOnType.length > 0, "Headers annotation was empty on type %s.",
             targetType.getName());
+        // 将得到的请求头,转换成map
         Map<String, Collection<String>> headers = toMap(headersOnType);
         headers.putAll(data.template().headers());
+        // 清除掉之前原有的请求头....
         data.template().headers(null); // to clear
         data.template().headers(headers);
       }
@@ -222,7 +289,12 @@ public interface Contract {
                                              Annotation methodAnnotation,
                                              Method method) {
       Class<? extends Annotation> annotationType = methodAnnotation.annotationType();
+
       if (annotationType == RequestLine.class) {
+        // 如果注解类型是{@code RequestLine}
+        /**
+         * 注解是{@link RequestLine}, 获取到{@link RequestLine#value()}.
+         */
         String requestLine = RequestLine.class.cast(methodAnnotation).value();
         checkState(emptyToNull(requestLine) != null,
             "RequestLine annotation was empty on method %s.", method.getName());
@@ -233,14 +305,19 @@ public interface Contract {
               "RequestLine annotation didn't start with an HTTP verb on method %s",
               method.getName()));
         } else {
+          // 从value中获取到请求方法
           data.template().method(HttpMethod.valueOf(requestLineMatcher.group(1)));
+          // 从value中获取到请求url
           data.template().uri(requestLineMatcher.group(2));
         }
+
         data.template().decodeSlash(RequestLine.class.cast(methodAnnotation).decodeSlash());
         data.template()
             .collectionFormat(RequestLine.class.cast(methodAnnotation).collectionFormat());
 
       } else if (annotationType == Body.class) {
+        // 如果注解类型是{@code Body}
+        // 获取到Body值
         String body = Body.class.cast(methodAnnotation).value();
         checkState(emptyToNull(body) != null, "Body annotation was empty on method %s.",
             method.getName());
@@ -250,6 +327,8 @@ public interface Contract {
           data.template().bodyTemplate(body);
         }
       } else if (annotationType == Headers.class) {
+        // 如果注解类型是{@code Headers}
+        // 解析请求头
         String[] headersOnMethod = Headers.class.cast(methodAnnotation).value();
         checkState(headersOnMethod.length > 0, "Headers annotation was empty on method %s.",
             method.getName());

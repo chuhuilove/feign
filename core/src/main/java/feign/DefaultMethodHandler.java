@@ -10,6 +10,9 @@ import java.lang.reflect.Method;
 /**
  * Handles default methods by directly invoking the default method code on the interface. The bindTo
  * method must be called on the result before invoke is called.
+ *
+ * 处理接口中default修饰的方法
+ *
  */
 @IgnoreJRERequirement
 final class DefaultMethodHandler implements MethodHandler {

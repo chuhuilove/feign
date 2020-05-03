@@ -36,6 +36,7 @@ public interface Client {
 
   /**
    * 针对{@link Request#url() url}来执行远程请求,并返回结果
+   * 
    * @param request safe to replay.
    * @param options options to apply to this request.
    * @return connected response, {@link Response.Body} is absent or unread.
@@ -44,8 +45,7 @@ public interface Client {
   Response execute(Request request, Options options) throws IOException;
 
   /**
-   * {@code Client}的默认实现
-   * 先来看一下,默认实现,是怎么来搞定的
+   * {@code Client}的默认实现 先来看一下,默认实现,是怎么来搞定的
    */
   class Default implements Client {
 
@@ -62,12 +62,18 @@ public interface Client {
 
     @Override
     public Response execute(Request request, Options options) throws IOException {
+
+      // 将请求体转换成字节数组,并且发送出去
       HttpURLConnection connection = convertAndSend(request, options);
+
+      // 接收相应,并且解析相应
       return convertResponse(connection, request);
     }
 
     Response convertResponse(HttpURLConnection connection, Request request) throws IOException {
+      // 响应码
       int status = connection.getResponseCode();
+      // 相应消息
       String reason = connection.getResponseMessage();
 
       if (status < 0) {
@@ -76,6 +82,7 @@ public interface Client {
       }
 
       Map<String, Collection<String>> headers = new LinkedHashMap<>();
+      // 响应头
       for (Map.Entry<String, List<String>> field : connection.getHeaderFields().entrySet()) {
         // response message
         if (field.getKey() != null) {
@@ -103,10 +110,13 @@ public interface Client {
     }
 
     public HttpURLConnection getConnection(final URL url) throws IOException {
-      return (HttpURLConnection) url.openConnection();
+      HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+      System.err.println("url------->创建一个新的对象" + httpURLConnection.hashCode());
+      return httpURLConnection;
     }
 
     HttpURLConnection convertAndSend(Request request, Options options) throws IOException {
+
       final URL url = new URL(request.url());
       final HttpURLConnection connection = this.getConnection(url);
       if (connection instanceof HttpsURLConnection) {
@@ -125,8 +135,10 @@ public interface Client {
       connection.setRequestMethod(request.httpMethod().name());
 
       Collection<String> contentEncodingValues = request.headers().get(CONTENT_ENCODING);
+
       boolean gzipEncodedRequest =
           contentEncodingValues != null && contentEncodingValues.contains(ENCODING_GZIP);
+
       boolean deflateEncodedRequest =
           contentEncodingValues != null && contentEncodingValues.contains(ENCODING_DEFLATE);
 
@@ -166,6 +178,7 @@ public interface Client {
           out = new DeflaterOutputStream(out);
         }
         try {
+          // 把数据写出去
           out.write(request.requestBody().asBytes());
         } finally {
           try {

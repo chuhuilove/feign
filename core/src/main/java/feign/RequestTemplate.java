@@ -428,7 +428,7 @@ public final class RequestTemplate implements Serializable {
   }
 
   /**
-   * Set the target host for this request.
+   * Set the target host for this request. 为请求设置目标主机
    *
    * @param target host for this request. Must be an absolute target.
    * @return a RequestTemplate for chaining.

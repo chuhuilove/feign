@@ -36,15 +36,23 @@ public class ReflectiveFeign extends Feign {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T newInstance(Target<T> target) {
-    // 这里,实例化接口
+    // 返回的是方法名名+方法处理器
     Map<String, MethodHandler> nameToHandler = targetToHandlersByName.apply(target);
+
+
+
+    // 为什么要分成
     Map<Method, MethodHandler> methodToHandler = new LinkedHashMap<Method, MethodHandler>();
     List<DefaultMethodHandler> defaultMethodHandlers = new LinkedList<DefaultMethodHandler>();
 
     for (Method method : target.type().getMethods()) {
+      // 获取到主接口中的所有方法...
+      //
       if (method.getDeclaringClass() == Object.class) {
+        // 抛弃Object.class中的方法
         continue;
       } else if (Util.isDefault(method)) {
+
         DefaultMethodHandler handler = new DefaultMethodHandler(method);
         defaultMethodHandlers.add(handler);
         methodToHandler.put(method, handler);
@@ -52,6 +60,7 @@ public class ReflectiveFeign extends Feign {
         methodToHandler.put(method, nameToHandler.get(Feign.configKey(target.type(), method)));
       }
     }
+
     InvocationHandler handler = factory.create(target, methodToHandler);
     T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(),
         new Class<?>[] {target.type()}, handler);
@@ -73,7 +82,12 @@ public class ReflectiveFeign extends Feign {
     }
 
     /**
-     * InvocationHandler接口中定义,需要实现的函数
+     * InvocationHandler接口中定义,需要实现的函数, 在openfeign中,最后的invoke,根据方法名称,可能会被分发到两个实现类:
+     * <ul>
+     * <li>{@link SynchronousMethodHandler#invoke(java.lang.Object[])}
+     * <li>{@link DefaultMethodHandler#invoke(java.lang.Object[])}
+     * </ul>
+     *
      * @param proxy
      * @param method
      * @param args
@@ -147,19 +161,30 @@ public class ReflectiveFeign extends Feign {
     }
 
     public Map<String, MethodHandler> apply(Target key) {
+
+      // 方法的元数据获取到了...
       List<MethodMetadata> metadata = contract.parseAndValidatateMetadata(key.type());
+
+
       Map<String, MethodHandler> result = new LinkedHashMap<String, MethodHandler>();
       for (MethodMetadata md : metadata) {
+        // 根据每个方法,来构建参数模板
         BuildTemplateByResolvingArgs buildTemplate;
+
         if (!md.formParams().isEmpty() && md.template().bodyTemplate() == null) {
+
           buildTemplate = new BuildFormEncodedTemplateFromArgs(md, encoder, queryMapEncoder);
         } else if (md.bodyIndex() != null) {
+
           buildTemplate = new BuildEncodedTemplateFromArgs(md, encoder, queryMapEncoder);
         } else {
+
           buildTemplate = new BuildTemplateByResolvingArgs(md, queryMapEncoder);
         }
+        // 创建MethodHandler实例,这个MethodHandler类似于InvocationHandler
         result.put(md.configKey(),
             factory.create(key, md, buildTemplate, options, decoder, errorDecoder));
+
       }
       return result;
     }

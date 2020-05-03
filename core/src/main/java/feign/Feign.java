@@ -44,6 +44,7 @@ public abstract class Feign {
    * </pre>
    *
    * Note that there is no whitespace expected in a key!
+   * 
    * @param targetType {@link feign.Target#type() type} of the Feign interface.
    * @param method invoked method, present on {@code type} or its super.
    * @see MethodMetadata#configKey()
@@ -64,21 +65,11 @@ public abstract class Feign {
 
   public static void main(String[] args) {
     Method[] methods = Feign.class.getMethods();
-    Arrays.stream(methods).forEach(e-> System.err.println(configKey(Feign.class, e)));
+    Arrays.stream(methods).forEach(e -> System.err.println(configKey(Feign.class, e)));
     /**
-     * Feign#main(String[])
-     * Feign#builder()
-     * Feign#newInstance(Target)
-     * Feign#configKey(Method)
-     * Feign#configKey(Class,Method)
-     * Feign#wait(long)
-     * Feign#wait(long,int)
-     * Feign#wait()
-     * Feign#equals(Object)
-     * Feign#toString()
-     * Feign#hashCode()
-     * Feign#getClass()
-     * Feign#notify()
+     * Feign#main(String[]) Feign#builder() Feign#newInstance(Target) Feign#configKey(Method)
+     * Feign#configKey(Class,Method) Feign#wait(long) Feign#wait(long,int) Feign#wait()
+     * Feign#equals(Object) Feign#toString() Feign#hashCode() Feign#getClass() Feign#notify()
      * Feign#notifyAll()
      */
   }
@@ -93,9 +84,9 @@ public abstract class Feign {
 
   /**
    * Returns a new instance of an HTTP API, defined by annotations in the {@link Feign Contract},
-   * for the specified {@code target}.
-   * 返回HTTP API的新实例,该实例由{@link Feign Contract}中的注解针对指定的{@code target}定义.
-   * 你应该缓存这个结果.
+   * for the specified {@code target}. 返回HTTP API的新实例,该实例由{@link Feign
+   * Contract}中的注解针对指定的{@code target}定义. 你应该缓存这个结果.
+   * 这个函数,在{@link ReflectiveFeign#newInstance(Target)}中实现...
    */
   public abstract <T> T newInstance(Target<T> target);
 
@@ -104,7 +95,8 @@ public abstract class Feign {
    */
   public static class Builder {
 
-    private final List<RequestInterceptor> requestInterceptors = new ArrayList<RequestInterceptor>();
+    private final List<RequestInterceptor> requestInterceptors =
+        new ArrayList<RequestInterceptor>();
     private Logger.Level logLevel = Logger.Level.NONE;
     private Contract contract = new Contract.Default();
     private Client client = new Client.Default(null, null);

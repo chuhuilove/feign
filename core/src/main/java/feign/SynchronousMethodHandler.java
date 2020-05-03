@@ -16,25 +16,57 @@ import static feign.Util.checkNotNull;
 import static feign.Util.ensureClosed;
 
 /**
- * 同步调用.....
+ * 同步调用..... 这里是代理方法调用的地方
  */
 final class SynchronousMethodHandler implements MethodHandler {
 
   private static final long MAX_RESPONSE_BUFFER_SIZE = 8192L;
 
+  /**
+   * metadata和SynchronousMethodHandler是一对一的关系
+   * 在{@link ReflectiveFeign.ParseHandlersByName#apply(feign.Target)}中体现
+   * 在将主接口中的每一个方法都解析成{@code MethodMetadata}类型后, 这时候,要为每一个方法生成一个具体的实现
+   */
   private final MethodMetadata metadata;
+  /**
+   * 主接口
+   */
   private final Target<?> target;
+  /**
+   * http客户端
+   */
   private final Client client;
+  /**
+   * 重试器
+   */
   private final Retryer retryer;
+  /**
+   * 拦截器
+   */
   private final List<RequestInterceptor> requestInterceptors;
   private final Logger logger;
   private final Logger.Level logLevel;
+  /**
+   * 参数构建模板
+   */
   private final RequestTemplate.Factory buildTemplateFromArgs;
+  /**
+   * 设置http连接超时时间/读取超时时间
+   */
   private final Options options;
+  /**
+   * 解码器
+   */
   private final Decoder decoder;
+  /**
+   * 错误解码器
+   */
   private final ErrorDecoder errorDecoder;
   private final boolean decode404;
   private final boolean closeAfterDecode;
+  /**
+   * 异常传播策略
+   */
   private final ExceptionPropagationPolicy propagationPolicy;
 
   private SynchronousMethodHandler(Target<?> target, Client client, Retryer retryer,
@@ -43,6 +75,8 @@ final class SynchronousMethodHandler implements MethodHandler {
       RequestTemplate.Factory buildTemplateFromArgs, Options options,
       Decoder decoder, ErrorDecoder errorDecoder, boolean decode404,
       boolean closeAfterDecode, ExceptionPropagationPolicy propagationPolicy) {
+
+
     this.target = checkNotNull(target, "target");
     this.client = checkNotNull(client, "client for %s", target);
     this.retryer = checkNotNull(retryer, "retryer for %s", target);
@@ -62,6 +96,9 @@ final class SynchronousMethodHandler implements MethodHandler {
 
   @Override
   public Object invoke(Object[] argv) throws Throwable {
+    /**
+     * {@link MethodHandler#invoke(Object[])}了方法
+     */
     RequestTemplate template = buildTemplateFromArgs.create(argv);
     Options options = findOptions(argv);
     Retryer retryer = this.retryer.clone();
@@ -87,6 +124,14 @@ final class SynchronousMethodHandler implements MethodHandler {
     }
   }
 
+  /**
+   * 具体执行远程调用的方法
+   *
+   * @param template
+   * @param options
+   * @return
+   * @throws Throwable
+   */
   Object executeAndDecode(RequestTemplate template, Options options) throws Throwable {
     Request request = targetRequest(template);
 
@@ -185,18 +230,31 @@ final class SynchronousMethodHandler implements MethodHandler {
 
   static class Factory {
 
+    /**
+     * Http客户端
+     */
     private final Client client;
+    /**
+     * 重试机制
+     */
     private final Retryer retryer;
+    /**
+     * 拦截器
+     */
     private final List<RequestInterceptor> requestInterceptors;
     private final Logger logger;
     private final Logger.Level logLevel;
     private final boolean decode404;
     private final boolean closeAfterDecode;
+    /**
+     * 异常传播策略,针对主接口
+     */
     private final ExceptionPropagationPolicy propagationPolicy;
 
     Factory(Client client, Retryer retryer, List<RequestInterceptor> requestInterceptors,
         Logger logger, Logger.Level logLevel, boolean decode404, boolean closeAfterDecode,
         ExceptionPropagationPolicy propagationPolicy) {
+
       this.client = checkNotNull(client, "client");
       this.retryer = checkNotNull(retryer, "retryer");
       this.requestInterceptors = checkNotNull(requestInterceptors, "requestInterceptors");
@@ -207,6 +265,16 @@ final class SynchronousMethodHandler implements MethodHandler {
       this.propagationPolicy = propagationPolicy;
     }
 
+
+    /**
+     * @param target 主接口
+     * @param md 主接口下面的某个方法,被解析成{@code MethodMetadata}类型
+     * @param buildTemplateFromArgs 请求模板
+     * @param options 可选的一些项....
+     * @param decoder 本次请求的解码器
+     * @param errorDecoder 请求发生错误时的解码器
+     * @return {@code MethodHandler}的一个实现类{@link SynchronousMethodHandler}
+     */
     public MethodHandler create(Target<?> target,
                                 MethodMetadata md,
                                 RequestTemplate.Factory buildTemplateFromArgs,

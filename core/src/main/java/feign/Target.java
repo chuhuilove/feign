@@ -50,6 +50,11 @@ public interface Target<T> {
    */
   public Request apply(RequestTemplate input);
 
+  /**
+   * 为接口生成代理类...????
+   * 
+   * @param <T>
+   */
   public static class HardCodedTarget<T> implements Target<T> {
 
     private final Class<T> type;

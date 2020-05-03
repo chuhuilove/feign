@@ -8,7 +8,7 @@ import java.util.*;
 import feign.template.BodyTemplate;
 
 /**
- * An immutable request to an http server.
+ * 对HTTP服务器的不可变请求.
  */
 public final class Request {
 
@@ -71,6 +71,9 @@ public final class Request {
 
   }
 
+  /**
+   * 请求方法
+   */
   public enum HttpMethod {
     GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
   }
@@ -157,6 +160,12 @@ public final class Request {
   }
 
   /* Fully resolved URL including query. */
+
+  /**
+   * 返回全部url
+   * 
+   * @return
+   */
   public String url() {
     return url;
   }
@@ -207,14 +216,21 @@ public final class Request {
     return builder.toString();
   }
 
-  /*
+  /**
    * Controls the per-request settings currently required to be implemented by all {@link Client
    * clients}
    */
   public static class Options {
 
+    /**
+     * 连接超时时间
+     */
     private final int connectTimeoutMillis;
+    /**
+     * 读取超时时间
+     */
     private final int readTimeoutMillis;
+
     private final boolean followRedirects;
 
     public Options(int connectTimeoutMillis, int readTimeoutMillis, boolean followRedirects) {

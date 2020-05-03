@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * Static methods for working with types.
+ * Static methods for working with types. 处理类型的静态类
  *
  * @author Bob Lee
  * @author Jesse Wilson

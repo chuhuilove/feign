@@ -2,9 +2,7 @@ package feign;
 
 /**
  * Zero or more {@code RequestInterceptors} may be configured for purposes such as adding headers to
- * all requests.
- * 可以配置零个或多个{@code RequestInterceptors},用于向所有请求添加请求头等信息.
- * 对于拦截器的应用顺序,不做任何保证.
+ * all requests. 可以配置零个或多个{@code RequestInterceptors},用于向所有请求添加请求头等信息. 对于拦截器的应用顺序,不做任何保证.
  * 一旦拦截器被应用,就会调用{@link Target#apply(RequestTemplate)}来创建通过
  * {@link Client#execute(Request, feign.Request.Options)}发送的不变的HTTP请求.<br>
  * <br>

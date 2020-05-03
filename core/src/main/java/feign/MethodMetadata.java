@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import feign.Param.Expander;
 
+/**
+ * 描述接口中方法的类 级别和Java中的Class,Spring-Framework中的BeanDefinition的作用一样
+ */
 public final class MethodMetadata implements Serializable {
 
   private static final long serialVersionUID = 1L;
