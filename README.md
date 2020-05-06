@@ -4,58 +4,57 @@
 [![Build Status](https://travis-ci.org/OpenFeign/feign.svg?branch=master)](https://travis-ci.org/OpenFeign/feign)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.openfeign/feign-core/badge.png)](https://search.maven.org/artifact/io.github.openfeign/feign-core/)
 
-Feign is a Java to HTTP client binder inspired by [Retrofit](https://github.com/square/retrofit), [JAXRS-2.0](https://jax-rs-spec.java.net/nonav/2.0/apidocs/index.html), and [WebSocket](http://www.oracle.com/technetwork/articles/java/jsr356-1937161.html).  Feign's first goal was reducing the complexity of binding [Denominator](https://github.com/Netflix/Denominator) uniformly to HTTP APIs regardless of [ReSTfulness](http://www.slideshare.net/adrianfcole/99problems).
-
+Feign是受[Retrofit](https://github.com/square/retrofit), [JAXRS-2.0](https://jax-rs-spec.java.net/nonav/2.0/apidocs/index.html),和[WebSocket](http://www.oracle.com/technetwork/articles/java/jsr356-1937161.html).启发的Java到HTTP客户端绑定程序.Feign的第一个目标是减少与[ReSTfulness](http://www.slideshare.net/adrianfcole/99problems)无关的将[Denominator](https://github.com/Netflix/Denominator) 统一绑定到HTTP API的复杂性.
 ---
-# Roadmap
+# 路线图
 ## Feign 11 and beyond 
 Making _API_ clients easier
 
 Short Term - What we're working on now. ⏰ 
 ---
-* Response Caching
-  * Support caching of api responses.  Allow for user's to define under what conditions a response is eligible for caching and what type of caching mechanism should be used.
-  * Support in-memory caching and external cache implementations (EhCache, Google, Spring, etc...)
-* Complete URI Template expression support
-  * Support [level 1 through level 4](https://tools.ietf.org/html/rfc6570#section-1.2) URI template expressions.
-  * Use [URI Templates TCK](https://github.com/uri-templates/uritemplate-test) to verify compliance.
-* `Logger` API refactor
-  * Refactor the `Logger` API to adhere closer to frameworks like SLF4J providing a common mental model for logging within Feign.  This model will be used by Feign itself throughout and provide clearer direction on how the `Logger` will be used.
-* `Retry` API refactor
-  * Refactor the `Retry` API to support user-supplied conditions and better control over back-off policies. **This may result in non-backward-compatible breaking changes**
+* 响应缓存
+  * 支持缓存api响应. 允许用户定义在什么条件下响应才适合进行缓存以及应使用哪种类型的缓存机制.
+  * 支持内存中缓存和外部缓存实现 (EhCache, Google, Spring, etc...)
+* 支持完整的URI模板表达式
+  * 支持[level 1 through level 4](https://tools.ietf.org/html/rfc6570#section-1.2)URI模板表达式.
+  * 使用[URI Templates TCK](https://github.com/uri-templates/uritemplate-test)验证合法性.
+* `Logger` API重构
+  * 重构`Logger`API,使之更接近SLF4J这样的框架,从而为在Feign中进行日志记录提供一个通用的智能模型.Feign本身将使用此模型,并为如何使用`Logger`提供更清晰的指导.
+* `Retry` API重构
+  * 重构`Retry` API以支持用户提供的条件并更好地控制回退策略.**这可能会导致不向后兼容的重大更改**
 
-Medium Term - What's up next. ⏲ 
+中期 - What's up next. ⏲ 
 ---
 * Metric API
-  * Provide a first-class Metrics API that user's can tap into to gain insight into the request/response lifecycle.  Possibly provide better [OpenTracing](https://opentracing.io/) support.
-* Async execution support via `CompletableFuture`
-  * Allow for `Future` chaining and executor management for the request/response lifecycle.  **Implementation will require non-backward-compatible breaking changes**.  However this feature is required before Reactive execution can be considered.
+  * 提供一流的Metrics API,用户可以利用它来深入了解请求/响应生命周期.可能会提供更好的[OpenTracing](https://opentracing.io/)支持.
+* 通过`CompletableFuture`支持异步执行
+  * 在请求/响应生命周期中允许`Future`链接和执行者管理. **实现将需要非向后兼容的重大更改**. 但是,在考虑反应性执行之前,需要这个特性.
 * Reactive execution support via [Reactive Streams](https://www.reactive-streams.org/)
-  * For JDK 9+, consider a native implementation that uses `java.util.concurrent.Flow`.
-  * Support for [Project Reactor](https://projectreactor.io/) and [RxJava 2+](https://github.com/ReactiveX/RxJava) implementations on JDK 8.
+  * 对于JDK 9+，请考虑使用`java.util.concurrent.Flow`的原生实现.
+  * 支持JDK 8上的[Project Reactor](https://projectreactor.io/)和[RxJava 2+](https://github.com/ReactiveX/RxJava)实现.
 
-Long Term - The future ☁️ 
+长期 - The future ☁️ 
 ---
-* Additional Circuit Breaker Support.
-  * Support additional Circuit Breaker implementations like [Resilience4J](https://resilience4j.readme.io/) and Spring Circuit Breaker
+* 其他断路器支持
+  * 支持其他断路器实现，例如[Resilience4J](https://resilience4j.readme.io/)和Spring Circuit断路器.
 
 ---  
 
 ### Why Feign and not X?
 
-Feign uses tools like Jersey and CXF to write java clients for ReST or SOAP services. Furthermore, Feign allows you to write your own code on top of http libraries such as Apache HC. Feign connects your code to http APIs with minimal overhead and code via customizable decoders and error handling, which can be written to any text-based http API.
+Feign使用Jersey和CXF之类的工具为ReST或SOAP服务编写Java客户端.此外,Feign允许您在诸如Apache HC之类的http库之上编写自己的代码.Feign通过可自定义的解码器和错误处理功能,以最小的开销和代码将代码连接到http API,可以将其写入任何基于文本的http API.
 
 ### How does Feign work?
 
-Feign works by processing annotations into a templatized request. Arguments are applied to these templates in a straightforward fashion before output.  Although Feign is limited to supporting text-based APIs, it dramatically simplifies system aspects such as replaying requests. Furthermore, Feign makes it easy to unit test your conversions knowing this.
+Feign的工作原理是将注解处理成模板化的请求.在输出之前,参数以简单的方式应用于这些模板.尽管Feign仅限于支持基于文本的api,但它极大地简化了系统方面,如重试请求.
 
 ### Java Version Compatibility
 
-Feign 10.x and above are built on Java 8 and should work on Java 9, 10, and 11.  For those that need JDK 6 compatibility, please use Feign 9.x
+Feign 10.x及更高版本是在Java 8上构建的,应在Java 9,10和11上运行.对于那些需要JDK 6兼容性的应用程序,请使用Feign 9.x
 
 ### Basics
 
-Usage typically looks like this, an adaptation of the [canonical Retrofit sample](https://github.com/square/retrofit/blob/master/samples/src/main/java/com/example/retrofit/SimpleService.java).
+使用通常看起来像这样,是[规范改造样本][canonical Retrofit sample](https://github.com/square/retrofit/blob/master/samples/src/main/java/com/example/retrofit/SimpleService.java)的改编.
 
 ```java
 interface GitHub {
@@ -95,10 +94,9 @@ public class MyApp {
 }
 ```
 
-### Interface Annotations
+### 接口注解
 
-Feign annotations define the `Contract` between the interface and how the underlying client
-should work.  Feign's default contract defines the following annotations:
+Feign注解定义了接口与基础客户端应如何工作之间的`Contract`.Feign的默认contract定义了以下注解:
 
 | Annotation     | Interface Target | Usage |
 |----------------|------------------|-------|
@@ -110,11 +108,11 @@ should work.  Feign's default contract defines the following annotations:
 | `@Body`        | Method           | Defines a `Template`, similar to a `UriTemplate` and `HeaderTemplate`, that uses `@Param` annotated values to resolve the corresponding `Expressions`.|
 
 
-> **Overriding the Request Line**
+> **覆盖Request Line**
 >
-> If there is a need to target a request to a different host then the one supplied when the Feign client was created, or
-> you want to supply a target host for each request, include a `java.net.URI` parameter and Feign will use that value
-> as the request target.
+> 如果需要将请求定向到不同的主机,
+> 则需要在创建Feign客户端时提供主机,或者要为每个请求提供目标主机,
+> 请包含一个`java.net.URI`参数,Feign将使用该值作为请求目标.
 >
 > ```java
 > @RequestLine("POST /repos/{owner}/{repo}/issues")
@@ -122,12 +120,11 @@ should work.  Feign's default contract defines the following annotations:
 > ``` 
 > 
 
-### Templates and Expressions
+### 模板和表达式
 
-Feign `Expressions` represent Simple String Expressions (Level 1) as defined by [URI Template - RFC 6570](https://tools.ietf.org/html/rfc6570).  `Expressions` are expanded using
-their corresponding `Param` annotated method parameters.  
+Feign `Expressions`表示简单字符串表达式(级别1),如[URI Template - RFC 6570](https://tools.ietf.org/html/rfc6570)所定义.`Expressions`使用对应的带注解的方法参数`Param`扩展.
 
-*Example*
+*示例*
 
 ```java
 public interface GitHub {
@@ -157,25 +154,25 @@ public class MyApp {
 }
 ```
 
-Expressions must be enclosed in curly braces `{}` and may contain regular expression patterns, separated by a colon `:`  to restrict
-resolved values.  *Example* `owner` must be alphabetic. `{owner:[a-zA-Z]*}`
+表达式必须包含在大括号`{}`中,并且可以包含正则表达式模式,用冒号`:`分隔以进行限制解析值.*示例* `owner`必须是字母.`{owner:[a-zA-Z]*}`
 
-#### Request Parameter Expansion
+#### 请求参数扩充
 
-`RequestLine` and `QueryMap` templates follow the [URI Template - RFC 6570](https://tools.ietf.org/html/rfc6570) specification for Level 1 templates, which specifies the following:
+`RequestLine`和`QueryMap`模板遵循针对1级模板的[URI Template - RFC 6570](https://tools.ietf.org/html/rfc6570)规范,它规定了以下内容:
 
-* Unresolved expressions are omitted.
-* All literals and variable values are pct-encoded, if not already encoded or marked `encoded` via a `@Param` annotation.
+* 未解析的表达式将被省略.
+* 如果还没有通过`@Param`注解进行编码或标记为`encoded`的话,所有文本和变量值都是pct编码的.
 
-#### Undefined vs. Empty Values ####
 
-Undefined expressions are expressions where the value for the expression is an explicit `null` or no value is provided.
+#### 未定义 vs. 空值 ####
+
+未定义表达式是指表达式的值是显式的`null`或不提供值的表达式.
 Per [URI Template - RFC 6570](https://tools.ietf.org/html/rfc6570), it is possible to provide an empty value
 for an expression.  When Feign resolves an expression, it first determines if the value is defined, if it is then
 the query parameter will remain.  If the expression is undefined, the query parameter is removed.  See below
 for a complete breakdown.
 
-*Empty String*
+*空字符串*
 ```java
 public void test() {
    Map<String, Object> parameters = new LinkedHashMap<>();
@@ -183,7 +180,7 @@ public void test() {
    this.demoClient.test(parameters);
 }
 ```
-Result
+结果
 ```
 http://localhost:8080/test?param=
 ```
@@ -195,12 +192,12 @@ public void test() {
    this.demoClient.test(parameters);
 }
 ```
-Result
+结果
 ```
 http://localhost:8080/test
 ```
 
-*Undefined*
+*未定义*
 ```java
 public void test() {
    Map<String, Object> parameters = new LinkedHashMap<>();
@@ -208,18 +205,18 @@ public void test() {
    this.demoClient.test(parameters);
 }
 ```
-Result
+结果
 ```
 http://localhost:8080/test
 ```
 
-See [Advanced Usage](#advanced-usage) for more examples.
+查看[Advanced Usage](#advanced-usage)来获取更多示例.
 
-> **What about slashes? `/`**
+> **那斜杠呢? `/`**
 >
-> `@RequestLine` and `@QueryMap` templates do not encode slash `/` characters by default.  To change this behavior, set the `decodeSlash` property on the `@RequestLine` to `false`.  
+> `@RequestLine`和`@QueryMap`模板默认不对斜杠`/`编码.要更改此行为,请将`@RequestLine`上的`decodeSlash`属性设置为`false`.  
 
-> **What about plus? `+`**
+> *那加号呢? `+`**
 >
 > Per the URI specification, a `+` sign is allowed in both the path and query segments of a URI, however, handling of
 > the symbol on the query can be inconsistent.  In some legacy systems, the `+` is equivalent to the a space.  Feign takes the approach of modern systems, where a
@@ -227,34 +224,30 @@ See [Advanced Usage](#advanced-usage) for more examples.
 >
 > If you wish to use `+` as a space, then use the literal ` ` character or encode the value directly as `%20`
  
-##### Custom Expansion
+##### 自定义扩展
 
-The `@Param` annotation has an optional property `expander` allowing for complete control over the individual parameter's expansion.
-The `expander` property must reference a class that implements the `Expander` interface:
+`@Param`注解具有可选属性`expander`,可以完全控制各个参数的扩展.`expander`属性必须引用实现`Expander`接口的类.
 
 ```java
 public interface Expander {
     String expand(Object value);
 }
 ```
-The result of this method adheres to the same rules stated above.  If the result is `null` or an empty string,
-the value is omitted.  If the value is not pct-encoded, it will be.  See [Custom @Param Expansion](#custom-param-expansion) for more examples.
+该方法的结果符合上述相同的规则. 如果结果为`null`或空字符串,则省略该值.如果该值未经过pct编码,则为.查看[Custom @Param Expansion](#custom-param-expansion)获取更多示例.
 
-#### Request Headers Expansion 
+#### 请求头扩展 
 
-`Headers` and `HeaderMap` templates follow the same rules as [Request Parameter Expansion](#request-parameter-expansion) 
-with the following alterations:
+`Headers`和`HeaderMap`模板遵循与[Request Parameter Expansion](#request-parameter-expansion)相同的规则,但有以下更改:
 
-* Unresolved expressions are omitted.  If the result is an empty header value, the entire header is removed.
-* No pct-encoding is performed.
+* 未解析的表达式将被省略. 如果结果是空的header值,则将删除整个header.
+* 不执行pct编码.
 
-See [Headers](#headers) for examples.
+查看[Headers](#headers)来看更多示例.
 
-> **A Note on `@Param` parameters and their names**: 
+> **关于`@Param`参数及其名称的说明**: 
 >
-> All expressions with the same name, regardless of their position on the `@RequestLine`, `@QueryMap`, `@BodyTemplate`, or `@Headers` will resolve to the same value.
-> In the following example, the value of `contentType`, will be used to resolve both the header and path expression:
->
+> 具有相同名称的所有表达式,无论它们在`@RequestLine`,`@QueryMap`,`@BodyTemplate`,还是`@Headers`上的位置如何,都将解析为相同的值.
+> 在下面的示例中,将使用`contentType`的值来解析header和path表达式:
 > ```java
 > public interface ContentService {
 >   @RequestLine("GET /api/documents/{contentType}")
@@ -263,21 +256,20 @@ See [Headers](#headers) for examples.
 > }
 >```
 > 
-> Keep this in mind when designing your interfaces.
+> 设计接口时,请记住这一点.
 
-#### Request Body Expansion
+#### 请求体扩展
 
-`Body` templates follow the same rules as [Request Parameter Expansion](#request-parameter-expansion) 
-with the following alterations:
+`Body`模板遵循与[Request Parameter Expansion](#request-parameter-expansion)相同的规则,但有以下更改:
 
-* Unresolved expressions are omitted.
-* Expanded value will **not** be passed through an `Encoder` before being placed on the request body.
-* A `Content-Type` header must be specified.  See [Body Templates](#body-templates) for examples.
+* 未解析的表达式被省略.
+* 扩展值在放置在请求主体上之前**不**通过`Encoder`传递.
+* 必须指定`Content-Type` header.看[Body Templates](#body-templates)示例.
 
 ---
-### Customization
+### Customization定制
 
-Feign has several aspects that can be customized.  For simple cases, you can use `Feign.builder()` to construct an API interface with your custom components.  For example:
+Feign有几个方面是可以定制的.对于简单的情况,你可以使用`Feign.builder()`来构造一个带有自定义组件的API接口.比如:
 
 ```java
 interface Bank {
@@ -294,10 +286,10 @@ public class BankService {
 }
 ```
 
-### Multiple Interfaces
-Feign can produce multiple api interfaces.  These are defined as `Target<T>` (default `HardCodedTarget<T>`), which allow for dynamic discovery and decoration of requests prior to execution.
+### 多个接口
+Feign可以生成多个api接口.这些被定义为`Target<T>`(默认`HardCodedTarget<T>`),它允许在执行之前动态发现和修饰请求.
 
-For example, the following pattern might decorate each request with the current url and auth token from the identity service.
+例如,以下模式可能使用identity服务中的当前url和auth token 修饰每个请求.
 
 ```java
 public class CloudService {
@@ -312,17 +304,19 @@ public class CloudService {
 }
 ```
 
-### Examples
-Feign includes example [GitHub](./example-github) and [Wikipedia](./example-wikipedia) clients. The denominator project can also be scraped for Feign in practice. Particularly, look at its [example daemon](https://github.com/Netflix/denominator/tree/master/example-daemon).
+### 示例
+Feign包括示例[GitHub](./example-github)和[Wikipedia](./example-wikipedia)客户端.
+denominator项目在实践中也可以取消.特别是,请查看其[example daemon](https://github.com/Netflix/denominator/tree/master/example-daemon).
 
 ---
-### Integrations
-Feign intends to work well with other Open Source tools.  Modules are welcome to integrate with your favorite projects!
+### 集成
+Feign可以与其他开放源代码工具一起很好地工作.
 
 ### Gson
-[Gson](./gson) includes an encoder and decoder you can use with a JSON API.
 
-Add `GsonEncoder` and/or `GsonDecoder` to your `Feign.Builder` like so:
+[Gson](./gson) 包括可用于JSON API的编码器和解码器.
+
+像这样将`GsonEncoder`和/或`GsonDecoder`添加到你的`Feign.Builder`中:
 
 ```java
 public class Example {
@@ -337,7 +331,8 @@ public class Example {
 ```
 
 ### Jackson
-[Jackson](./jackson) includes an encoder and decoder you can use with a JSON API.
+
+[Jackson](./jackson) 包含可用于JSON API的编码器和解码器.
 
 Add `JacksonEncoder` and/or `JacksonDecoder` to your `Feign.Builder` like so:
 
@@ -751,7 +746,7 @@ public class Example {
 The SLF4JLogger (see above) may also be of interest.
 
 
-#### Request Interceptors
+#### 请求拦截器
 When you need to change all requests, regardless of their target, you'll want to configure a `RequestInterceptor`.
 For example, if you are acting as an intermediary, you might want to propagate the `X-Forwarded-For` header.
 
@@ -796,8 +791,8 @@ public interface Api {
 }
 ```
 
-#### Dynamic Query Parameters
-A Map parameter can be annotated with `QueryMap` to construct a query that uses the contents of the map as its query parameters.
+#### 动态查询参数
+可以使用`QueryMap`注解Map参数,以构造一个使用Map的内容作为其查询参数的查询.
 
 ```java
 public interface Api {
@@ -806,7 +801,7 @@ public interface Api {
 }
 ```
 
-This may also be used to generate the query parameters from a POJO object using a `QueryMapEncoder`.
+也可以使用`QueryMapEncoder`从POJO对象生成查询参数.
 
 ```java
 public interface Api {
@@ -815,7 +810,8 @@ public interface Api {
 }
 ```
 
-When used in this manner, without specifying a custom `QueryMapEncoder`, the query map will be generated using member variable names as query parameter names. The following POJO will generate query params of "/find?name={name}&number={number}" (order of included query parameters not guaranteed, and as usual, if any value is null, it will be left out).
+当以这种方式使用时,无需指定自定义`QueryMapEncoder`,查询映射将使用成员变量名称作为查询参数名称来生成.
+以下POJO将生成查询参数"/find?name={name}&number={number}"(不保证所包含查询参数的顺序,如果任何值为null,它将被忽略).
 
 ```java
 public class CustomPojo {
@@ -829,7 +825,7 @@ public class CustomPojo {
 }
 ```
 
-To setup a custom `QueryMapEncoder`:
+设置自定义`QueryMapEncoder`:
 
 ```java
 public class Example {
@@ -841,7 +837,8 @@ public class Example {
 }
 ```
 
-When annotating objects with @QueryMap, the default encoder uses reflection to inspect provided objects Fields to expand the objects values into a query string. If you prefer that the query string be built using getter and setter methods, as defined in the Java Beans API, please use the BeanQueryMapEncoder
+使用@QueryMap注解对象时,默认编码器使用反射检查提供的对象字段,以将对象值扩展为查询字符串.
+如果您希望使用Java Beans API中定义的getter和setter方法构建查询字符串,请使用BeanQueryMapEncoder.
 
 ```java
 public class Example {
@@ -854,8 +851,7 @@ public class Example {
 ```
 
 ### Error Handling
-If you need more control over handling unexpected responses, Feign instances can
-register a custom `ErrorDecoder` via the builder.
+如果需要更多的控制来处理意外的响应,Feign实例可以通过构建器注册一个自定义的`ErrorDecoder`.
 
 ```java
 public class Example {
@@ -867,15 +863,13 @@ public class Example {
 }
 ```
 
-All responses that result in an HTTP status not in the 2xx range will trigger the `ErrorDecoder`'s `decode` method, allowing
-you to handle the response, wrap the failure into a custom exception or perform any additional processing.
-If you want to retry the request again, throw a `RetryableException`.  This will invoke the registered
-`Retryer`.
+所有导致HTTP状态不在2xx范围的响应都将触发`ErrorDecoder`的`decode`方法,允许自定义处理响应、将故障包装成自定义异常或执行任何附加处理.
+如果你想再次重试请求,抛出一个`RetryableException`.这将调用已注册的`Retryer`.
 
 ### Retry
-Feign, by default, will automatically retry `IOException`s, regardless of HTTP method, treating them as transient network
-related exceptions, and any `RetryableException` thrown from an `ErrorDecoder`.  To customize this
-behavior, register a custom `Retryer` instance via the builder.
+
+默认情况下,Feign会自动重试`IOException`,而不考虑HTTP方法,将其视为与网络临时相关的异常,以及从`ErrorDecoder`抛出的任何`RetryableException`.
+要自定义此行为,请通过生成器注册一个自定义`Retryer`实例.
 
 ```java
 public class Example {
@@ -887,17 +881,15 @@ public class Example {
 }
 ```
 
-`Retryer`s are responsible for determining if a retry should occur by returning either a `true` or
-`false` from the method `continueOrPropagate(RetryableException e);`  A `Retryer` instance will be 
-created for each `Client` execution, allowing you to maintain state bewteen each request if desired.
+`Retryer`负责通过从方法`continueOrPropagate(RetryableException e);`返回`true`或`false`来确定重试是否发生;
+`Retryer`实例将为每个`Client`执行创建,允许您在需要时维护每个请求的状态.
 
-If the retry is determined to be unsuccessful, the last `RetryException` will be thrown.  To throw the original
-cause that led to the unsuccessful retry, build your Feign client with the `exceptionPropagationPolicy()` option.
+如果确定重试不成功,将抛出最后一个`RetryException`.
+要抛出导致不成功重试的原始原因,请使用`exceptionPropagationPolicy()`选项构建自己的Feign客户端.
 
-#### Static and Default Methods
-Interfaces targeted by Feign may have static or default methods (if using Java 8+).
-These allows Feign clients to contain logic that is not expressly defined by the underlying API.
-For example, static methods make it easy to specify common client build configurations; default methods can be used to compose queries or define default parameters.
+#### 静态和默认方法
+如果使用Java8+,则Feign的目标接口可能有静态或默认方法. 这些允许Feign客户端包含底层API没有明确定义的逻辑.
+例如,静态方法使指定通用客户端构建配置变得容易;默认方法可用于组成查询或定义默认参数.
 
 ```java
 interface GitHub {
